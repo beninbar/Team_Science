@@ -95,7 +95,7 @@ CleanerRunner <- function(dataFolder = "data/indeed/", outFolder = "data/cleaned
   if (! dir.exists(outFolder))
     dir.create(outFolder)
   
-  list.files("data/indeed/", pattern = "\\.mhtml$", full.names = TRUE) %>%
+  list.files(dataFolder, pattern = "\\.mhtml$", full.names = TRUE) %>%
     { list(., paste0(outFolder, "/", gsub("\\.mhtml", "", basename(.)))) } %>%
       { mapply(.[[1]], .[[2]], FUN = CleanMHtml, USE.NAMES = FALSE) }
 }
