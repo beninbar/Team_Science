@@ -2,7 +2,7 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 
-
+# Readin converted csv fike
 github_url <- "https://raw.githubusercontent.com/Anthogonyst/Team_Science/andrew-dev/data/bls_occupational_wage_data.csv"
 
 df <- read.csv(github_url)
