@@ -3,7 +3,7 @@ library(tidyr)
 library(ggplot2)
 
 
-github_url <- "https://raw.githubusercontent.com/Anthogonyst/Team_Science/andrew-dev/data/bls_occupational_wage_data.csv"
+github_url <- "https://raw.githubusercontent.com/Anthogonyst/Team_Science/master/data/bls_occupational_wage_data.csv"
 
 df <- read.csv(github_url)
 
