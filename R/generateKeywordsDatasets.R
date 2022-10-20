@@ -8,12 +8,12 @@ library(seqinr)
 
 job = jsonlite::read_json("data/job_description_data.json")
 jobIdVector = sapply(job, function(x) { x$link }) %>%
-  magrittr::set_names(paste0("indeed_", 1:length(.)), .)
+  magrittr::set_names(paste0("linkedin_", 1:length(.)), .)
 
 data.frame(job_id = jobIds, job_url = names(jobIds)) %>%
   write.csv(., "data/keyword-posting-crosswalk.csv", row.names = FALSE)
 
-writeFiles = rep("data/keywords_indeed/", length(jobIds))
+writeFiles = rep("data/keywords_linkedin/", length(jobIds))
 
 
 ##### Function usage #####
@@ -26,7 +26,7 @@ dictionary = "https://github.com/ssvivian/WebstersDictionary/raw/master/dictiona
 
 ##### Sample runner #####
 
-values = GenerateKeywords(job, jobIdVector, writeFiles, dictionary, captureGroups, GrabIndeed)
+values = GenerateKeywords(job, jobIdVector, writeFiles, dictionary, captureGroups, GrabLinkedin)
 
 
 ##### Functions #####
@@ -36,7 +36,7 @@ values = GenerateKeywords(job, jobIdVector, writeFiles, dictionary, captureGroup
 #' 
 #' @author Anthogonyst
 #' @export
-GrabIndeed <- function(x) {
+GrabLinkedin <- function(x) {
   sapply(x$job_bullets, strsplit, "\\s") %>%
     c(., sapply(x$job_paragraphs, strsplit, "\\s")) %>%
       unlist(.) %>%
