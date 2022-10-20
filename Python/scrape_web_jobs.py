@@ -64,6 +64,12 @@ def create_json_output(jd_data,source):
         json.dump(jd_data, f, ensure_ascii=False,indent=4)
 
 def scrape_linkedin():
+    '''
+    Inputs: None
+    Outputs: List of defaultdict dictionaries with Linkedin job description data
+    Purpose: Grab data scientists job postings from LinkedIn.com
+
+    '''
     linkedin_link = 'https://www.linkedin.com/jobs/data-scientist-jobs?position=1&pageNum=0'
     browser = open_weblink(linkedin_link)
     jds = pull_job_pane_links(browser)
