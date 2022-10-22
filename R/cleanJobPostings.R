@@ -46,7 +46,7 @@ library(jsonlite)
 #' @param out The filepath to produce the output, default is the same folder
 #' @examples
 #' \dontrun{
-#' file = "data/indeed/1Data Scientist Jobs, Employment in Austin, TX _ Indeed.com.mhtml
+#' file = "data/indeed/1Data Scientist Jobs, Employment in Austin, TX _ Indeed.com.mhtml"
 #' optionalFolder = "data/cleaned_file"
 #' 
 #' CleanMHtml(file, optionalFolder)
