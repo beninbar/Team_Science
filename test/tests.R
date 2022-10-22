@@ -4,21 +4,21 @@ testthat::test_that("Check database loads keywords correctly", {
   
   job = jsonlite::read_json("data/job_description_data.json")
   jobIdVector = paste0("linkedin_", 1:length(job))
-  writeFiles = rep("data/testKW/", length(jobIdVector))
+  writeFiles = rep("data/test/", length(jobIdVector))
   captureGroups = c("n.", "a.", "v.")
   dictionary = "data/dictionary.json" %>%
     readLines(.) %>%
       jsonlite::fromJSON(.)
   
-  dir.create("data/testKW/")
+  dir.create("data/test/")
   lhs = GenerateKeywords(jobs = job, jobIds = jobIdVector, writeCsv = writeFiles, 
                          webster = dictionary, captures = captureGroups, FUN = GrabLinkedin)
   
-  rhs = LoadKeywordDatabase("data/testKW/")
+  rhs = LoadKeywordDatabase("data/test/")
   
-  list.files("data/testKW", no.. = TRUE, all.files = TRUE, full.names = TRUE) %>%
+  list.files("data/test", no.. = TRUE, all.files = TRUE, full.names = TRUE) %>%
     sapply(file.remove)
-  file.remove("data/testKW/")
+  file.remove("data/test/")
   
   testthat::expect_equivalent(SumFreq(lhs), SumFreq(rhs))
 })
