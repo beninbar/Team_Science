@@ -1,0 +1,54 @@
+---
+title: "LinkedIn Salary Data Extraction"
+author: "Andrew Bowen, Anthony Arroyo, Josh Forster, Ben Inbar"
+date: "2022-10-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(rjson)
+library(jsonlite)
+library(stringr)
+```
+
+Reading in our [scraped linkedin job posting data](https://github.com/Anthogonyst/Team_Science/blob/master/data/job_description_data.json). Will need to extract the salary information contained within the `job_paragraphs` and `job_bullets` character fields.
+```{r}
+data_url <- "https://raw.githubusercontent.com/Anthogonyst/Team_Science/master/data/job_description_data.json"
+
+df = jsonlite::fromJSON(data_url, simplifyDataFrame = TRUE, flatten=TRUE)
+
+head(df)
+```
+Extracting salary listings from the job postings that include them. These are typically formatted with 3 digits (e.g., 100k or $100k). 
+```{r}
+df <- df %>%
+        mutate(paragraph_salaries = str_extract(job_paragraphs, "\\$?\\d{3}k?")) %>%
+        mutate(bullet_salaries = str_extract(job_bullets, "\\$?\\d{3}k?"))
+
+df %>% select(paragraph_salaries, bullet_salaries)
+```
+
+These aren't perfect values, a lot of job listings we scraped don't post salary info. In addition, our regex picks up some 401k values, which are not salary values
+
+```{r}
+# Replacing 401k with
+
+df$paragraph_salaries = str_replace(df$paragraph_salaries, "401k?", "")
+df$bullet_salaries = str_replace(df$bullet_salaries, "401k?", "")
+
+df$paragraph_salaries = as.numeric(df$paragraph_salaries)
+df$bullet_salaries = as.numeric(df$bullet_salaries)
+
+head(df)
+```
+```{r}
+df$paragraph_salaries
+```
+
+
+
+```{r}
+ggplot(df, aes(x=paragraph_salaries)) + geom_histogram()
+```
