@@ -19,7 +19,7 @@ writeFiles = rep("data/keywords_linkedin/", length(jobIdVector))
 ##### Function usage #####
 
 captureGroups = c("n.", "a.", "v.")
-dictionary = "https://github.com/ssvivian/WebstersDictionary/raw/master/dictionary.json" %>%
+dictionary = "data/dictionary.json" %>%
   readLines(.) %>%
     jsonlite::fromJSON(.)
 
@@ -27,7 +27,8 @@ dictionary = "https://github.com/ssvivian/WebstersDictionary/raw/master/dictiona
 ##### Sample runner #####
 
 values = GenerateKeywords(job, jobIdVector, writeFiles, dictionary, captureGroups, GrabLinkedin)
-
+aggregates = SumFreq(values)
+finalReport = aggregates %>% .[.$numWords == 1, ]
 
 ##### Functions #####
 
@@ -157,7 +158,10 @@ SumFreq <- function(keywordsListOfLists) {
   keywordsListOfLists %>% 
     do.call(rbind, .) %>% 
       reshape2::dcast(., keyword ~ id, sum, value.var = "frequency") %>% 
-        dplyr::transmute(keyword, sumFreq = rowSums(dplyr::select(., -1)))
+        dplyr::transmute(keyword, sumFreq = rowSums(dplyr::select(., -1))) %>%
+          dplyr::mutate(numWords = sapply(keyword, function(x) { 
+            length(grep("\\s", seqinr::s2c(x))) + 1 
+          }))
 }
 
 #####  #####
