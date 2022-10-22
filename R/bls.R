@@ -58,6 +58,5 @@ data_salaries <- data_salaries %>% mutate(annual_iqr = as.numeric(A_PCT75) - as.
 data_salaries_long <- data_salaries %>% 
                             select(OCC_TITLE, A_PCT25, A_PCT75) %>%
                             pivot_longer(cols = -OCC_TITLE )
-ggplot(data_salaries_long, aes(x = name, y = value), group=OCC_TITLE, color=OCC_TITLE) + geom_line()
+# ggplot(data_salaries_long, aes(x = name, y = value), group=OCC_TITLE, color=OCC_TITLE) + geom_line()
 
-tas.numeric(A_PCT25) ~ as.numeric(A_PCT75)
