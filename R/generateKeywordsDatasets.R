@@ -37,7 +37,7 @@ write.csv(finalReport, "data/outputs/aggregateLinkedinKeywords.csv", row.names =
 
 ##### Functions #####
 
-#' Defines how to look the Indeed json data and convert to a vector of all capital letters
+#' Defines how to look the Linkedin json data and convert to a vector of all capital letters
 #' @param x Filepath
 #' 
 #' @author Anthogonyst
@@ -50,6 +50,11 @@ GrabLinkedin <- function(x) {
           toupper(.)
 }
 
+#' Defines how to look the Linkedin json data and convert to a vector of all capital letters
+#' @param x Filepath
+#' 
+#' @author Anthogonyst
+#' @export
 GrabLinkedinBullets <- function(x) {
   lhs = sapply(x$job_bullets, strsplit, "\\s")
   rhs = sapply(x$job_paragraphs, strsplit, "\\s")
@@ -84,7 +89,7 @@ GrabLinkedinBullets <- function(x) {
 #' @author Anthogonyst
 #' @export
 GenerateKeywords <- function(jobs, jobIds, writeCsv = NA, webster = dictionary,
-                             captures = captureGroups, FUN = GrabIndeed) {
+                             captures = captureGroups, FUN = GrabLinkedin) {
 
   DataPull = FUN
   mapply(jobs, jobIds, writeCsv, SIMPLIFY = FALSE, FUN = function(x, y, write) {
@@ -154,11 +159,31 @@ GenerateKeywords <- function(jobs, jobIds, writeCsv = NA, webster = dictionary,
   })
 }
 
+#' Generates the keywords frequency list by examining nouns and such
+#' @param keywordsFolder The folder with keyword frequencies found by @{GenerateKeywords}
+#' @examples
+#' \dontrun{
+#' df = GenerateKeywords(data, "primary_key", "data/discovered_keywords")
+#' 
+#' LoadKeywordDatabase("data/discovered_keywords")
+#' 
+#' }
+#' @author Anthogonyst
+#' @export
 LoadKeywordDatabase <- function(keywordsFolder = "data/keywords_linkedin/") {
   list.files(keywordsFolder, full.names = TRUE) %>%
     lapply(read.csv)
 }
 
+#' Generates the keywords frequency list by examining nouns and such
+#' @param keywordsListOfLists The keyword data from @{GenerateKeywords} or loaded from @{LoadKeywordDatabase}
+#' @examples
+#' \dontrun{
+#' aggregate = SumFreq(LoadKeywordDatabase("data/discovered_keywords"))
+#' 
+#' }
+#' @author Anthogonyst
+#' @export
 SumFreq <- function(keywordsListOfLists) { 
   keywordsListOfLists %>% 
     do.call(rbind, .) %>% 
