@@ -40,15 +40,24 @@ a_mean_box
 a_median_box <- ggplot(df, aes(x=A_MEDIAN)) + geom_boxplot() + ggtitle("Annual Median Salary: all occupations") + xlab("Annual Median Salary ($)")
 a_median_box
 
+
+#############################################################################
 # Comparing to other occupations that are data-specific
 data_salaries <- df %>% filter(str_detect(OCC_TITLE, "(Data)|(Analytics)"))
+data_salaries <- data_salaries[-5,]
+
 data_salaries
 
 # Making a box plot of 
 # Since these salary distributions aren't symmetric, we'll use median as our measure of center
-ggplot(data_salaries, aes(x = OCC_TITLE, y = A_MEDIAN)) + geom_bar(stat='identity') + theme(axis.text  = element_text(angle=90))# + coord_flip()
+ggplot(data_salaries, aes(x = OCC_TITLE, y = A_MEDIAN)) + geom_bar(stat='identity') + theme(axis.text  = element_text(angle=90))
 
+# Also want to calculate the interquartile range for data-specific occupations
+# We can garner this from the difference between the annual 75th and 25th percentiles present in our dataframe
+data_salaries <- data_salaries %>% mutate(annual_iqr = as.numeric(A_PCT75) - as.numeric(A_PCT25))
+data_salaries_long <- data_salaries %>% 
+                            select(OCC_TITLE, A_PCT25, A_PCT75) %>%
+                            pivot_longer(cols = -OCC_TITLE )
+ggplot(data_salaries_long, aes(x = name, y = value), group=OCC_TITLE, color=OCC_TITLE) + geom_line()
 
-
-
-
+tas.numeric(A_PCT25) ~ as.numeric(A_PCT75)
