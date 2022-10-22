@@ -3,6 +3,7 @@ library(magrittr)
 library(jsonlite)
 library(dplyr)
 library(seqinr)
+library(reshape2)
 
 ##### Parameters #####
 
@@ -10,16 +11,16 @@ job = jsonlite::read_json("data/job_description_data.json")
 jobIdVector = sapply(job, function(x) { x$link }) %>%
   magrittr::set_names(paste0("linkedin_", 1:length(.)), .)
 
-data.frame(job_id = jobIds, job_url = names(jobIds)) %>%
+data.frame(job_id = jobIdVector, job_url = names(jobIdVector)) %>%
   write.csv(., "data/keyword-posting-crosswalk.csv", row.names = FALSE)
 
-writeFiles = rep("data/keywords_linkedin/", length(jobIds))
+writeFiles = rep("data/keywords_linkedin/", length(jobIdVector))
 
 
 ##### Function usage #####
 
 captureGroups = c("n.", "a.", "v.")
-dictionary = "https://github.com/ssvivian/WebstersDictionary/raw/master/dictionary.json" %>%
+dictionary = "data/dictionary.json" %>%
   readLines(.) %>%
     jsonlite::fromJSON(.)
 
@@ -27,6 +28,11 @@ dictionary = "https://github.com/ssvivian/WebstersDictionary/raw/master/dictiona
 ##### Sample runner #####
 
 values = GenerateKeywords(job, jobIdVector, writeFiles, dictionary, captureGroups, GrabLinkedin)
+aggregates = SumFreq(values)
+finalReport = aggregates %>% .[.$numWords == 1, ]
+
+write.csv(aggregates, "data/outputs/aggregateLinkedinPhrases.csv", row.names = FALSE)
+write.csv(finalReport, "data/outputs/aggregateLinkedinKeywords.csv", row.names = FALSE)
 
 
 ##### Functions #####
@@ -42,6 +48,22 @@ GrabLinkedin <- function(x) {
       unlist(.) %>%
         gsub("\\W", "", .) %>%
           toupper(.)
+}
+
+GrabLinkedinBullets <- function(x) {
+  lhs = sapply(x$job_bullets, strsplit, "\\s")
+  rhs = sapply(x$job_paragraphs, strsplit, "\\s")
+  
+  if (length(lhs) != 0) {
+    nvar = lhs
+  } else {
+    nvar = rhs
+  }
+  
+  nvar %>%
+    unlist(.) %>%
+      gsub("\\W", "", .) %>%
+        toupper(.)
 }
 
 #' Generates the keywords frequency list by examining nouns and such
@@ -61,7 +83,7 @@ GrabLinkedin <- function(x) {
 #' }
 #' @author Anthogonyst
 #' @export
-GenerateKeywords <- function(jobs, jobIds, writeCsv = NULL, webster = dictionary,
+GenerateKeywords <- function(jobs, jobIds, writeCsv = NA, webster = dictionary,
                              captures = captureGroups, FUN = GrabIndeed) {
 
   DataPull = FUN
@@ -117,7 +139,7 @@ GenerateKeywords <- function(jobs, jobIds, writeCsv = NULL, webster = dictionary
               .[! duplicated(.),] %>%
                 dplyr::arrange(desc(frequency))
     
-    if (! is.null(write)) {
+    if (! is.na(write)) {
       filename = paste0(write, y, ".csv")
       
       if (! file.exists(filename)) {
@@ -132,5 +154,20 @@ GenerateKeywords <- function(jobs, jobIds, writeCsv = NULL, webster = dictionary
   })
 }
 
+LoadKeywordDatabase <- function(keywordsFolder = "data/keywords_linkedin/") {
+  list.files(keywordsFolder, full.names = TRUE) %>%
+    lapply(read.csv)
+}
+
+SumFreq <- function(keywordsListOfLists) { 
+  keywordsListOfLists %>% 
+    do.call(rbind, .) %>% 
+      reshape2::dcast(., keyword ~ id, sum, value.var = "frequency") %>% 
+        dplyr::transmute(keyword, sumFreq = rowSums(dplyr::select(., -1))) %>%
+          dplyr::mutate(numWords = sapply(keyword, function(x) { 
+            length(grep("\\s", seqinr::s2c(x))) + 1 
+          })) %>%
+            dplyr::arrange(desc(sumFreq))
+}
 
 #####  #####
