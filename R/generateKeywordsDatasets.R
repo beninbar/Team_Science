@@ -3,6 +3,7 @@ library(magrittr)
 library(jsonlite)
 library(dplyr)
 library(seqinr)
+library(reshape2)
 
 ##### Parameters #####
 
@@ -29,6 +30,10 @@ dictionary = "data/dictionary.json" %>%
 values = GenerateKeywords(job, jobIdVector, writeFiles, dictionary, captureGroups, GrabLinkedin)
 aggregates = SumFreq(values)
 finalReport = aggregates %>% .[.$numWords == 1, ]
+
+write.csv(aggregates, "data/outputs/aggregateLinkedinPhrases.csv", row.names = FALSE)
+write.csv(finalReport, "data/outputs/aggregateLinkedinKeywords.csv", row.names = FALSE)
+
 
 ##### Functions #####
 
@@ -161,7 +166,8 @@ SumFreq <- function(keywordsListOfLists) {
         dplyr::transmute(keyword, sumFreq = rowSums(dplyr::select(., -1))) %>%
           dplyr::mutate(numWords = sapply(keyword, function(x) { 
             length(grep("\\s", seqinr::s2c(x))) + 1 
-          }))
+          })) %>%
+            dplyr::arrange(desc(sumFreq))
 }
 
 #####  #####
