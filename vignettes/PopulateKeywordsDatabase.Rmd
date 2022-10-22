@@ -1,6 +1,6 @@
 ---
-title: "Generate Keywords Database"
-author: "Anthony A"
+title: "Populate Keywords Database"
+author: "Anthony Arroyo, Josh Forster"
 date: "10/22/2022"
 output: html_document
 ---
@@ -60,8 +60,8 @@ singularAggregates = aggregates %>% .[.$numWords == 1, ]
 writeReports = FALSE
 
 if (writeReports) {
-  write.csv(aggregates, here::here("data/outputs/aggregateLinkedinPhrases.csv"), row.names = FALSE)
-  write.csv(singularAggregates, here::here("data/outputs/aggregateLinkedinKeywords.csv"), row.names = FALSE)
+  write.csv(aggregates, here::here("data/outputs/aggregateLinkedinPhrases.csv"), row.names = F)
+  write.csv(singularAggregates, here::here("data/outputs/aggregateLinkedinKeywords.csv"), row.names = F)
 }
 
 head(aggregates[-1:-10, ], 20)
