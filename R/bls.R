@@ -40,13 +40,13 @@ a_mean_box
 a_median_box <- ggplot(df, aes(x=A_MEDIAN)) + geom_boxplot() + ggtitle("Annual Median Salary: all occupations") + xlab("Annual Median Salary ($)")
 a_median_box
 
-# Comparing to other occupations/industries isn't
-data_salaries <- df %>% filter(str_detect(OCC_TITLE, "Data"))
+# Comparing to other occupations that are data-specific
+data_salaries <- df %>% filter(str_detect(OCC_TITLE, "(Data)|(Analytics)"))
 data_salaries
 
 # Making a box plot of 
 # Since these salary distributions aren't symmetric, we'll use median as our measure of center
-ggplot(data_salaries, aes(x = OCC_TITLE, y = A_MEDIAN)) + geom_boxplot()
+ggplot(data_salaries, aes(x = OCC_TITLE, y = A_MEDIAN)) + geom_bar(stat='identity') + theme(axis.text  = element_text(angle=90))# + coord_flip()
 
 
 
