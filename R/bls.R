@@ -18,7 +18,7 @@ ds_mean_salary <- ds_data$A_MEAN[[1]][1]
 ds_median_salary <- ds_data$A_MEDIAN[[1]][1]
 
 # Taking a quick look at the distributon of mean and median annual salaries across all occupations
-a_mean_dist <- ggplot(df, aes(x=A_MEAN)) + geom_histogram() + geom_vline(xintercept=ds_mean_salary) + annotate(label="Average DS salary")
+a_mean_dist <- ggplot(df, aes(x=A_MEAN)) + geom_histogram() + geom_vline(xintercept=ds_mean_salary) #+ annotate("text", x = 1.5 * ds_mean_salary, y = 300, label="Average DS salary")
 a_mean_dist
 
 a_median_dist <- ggplot(df, aes(x=A_MEDIAN)) + geom_histogram() + geom_vline(aes(xintercept=ds_median_salary))
