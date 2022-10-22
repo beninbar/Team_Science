@@ -1,6 +1,7 @@
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(stringr)
 
 # Reading converted csv file
 # original data link: https://www.bls.gov/oes/current/oes_nat.htm
@@ -26,21 +27,26 @@ df %>% summarise(annual_mean_salary = mean(A_MEAN, na.rm = TRUE),
                  ds_annual_median = ds_median_salary)
 
 # Taking a quick look at the distributon of mean and median annual salaries across all occupations
-a_mean_dist <- ggplot(df, aes(x=A_MEAN)) + geom_histogram(bins=25) + geom_vline(xintercept=ds_mean_salary)  + ggtitle("Annual Mean Salary: all occupations")
+a_mean_dist <- ggplot(df, aes(x=A_MEAN)) + geom_histogram(bins=25) + geom_vline(xintercept=ds_mean_salary) + geom_text(aes(x = ds_mean_salary + 50, label = "Data Science Salary", y=500), angle=90) + ggtitle("Annual Mean Salary: all occupations") + xlab("Annual Mean Salary ($)")
 a_mean_dist
 
 a_median_dist <- ggplot(df, aes(x=A_MEDIAN)) + 
-  geom_histogram(bins=25) + geom_vline(aes(xintercept=ds_median_salary)) + ggtitle("Annual Median Salary: all occupations")
+  geom_histogram(bins=25) + geom_vline(aes(xintercept=ds_median_salary), show_guide=TRUE) + ggtitle("Annual Median Salary: all occupations") + xlab("Annual Median Salary ($)")
 a_median_dist
 
-a_mean_box <- ggplot(df, aes(x=A_MEAN)) + geom_boxplot() + ggtitle("Annual Mean Salary: all occupations")
+a_mean_box <- ggplot(df, aes(x=A_MEAN)) + geom_boxplot() + ggtitle("Annual Mean Salary: all occupations") + xlab("Annual Mean Salary ($)")
 a_mean_box
 
-a_median_box <- ggplot(df, aes(x=A_MEDIAN)) + geom_boxplot() + ggtitle("Annual Median Salary: all occupations")
+a_median_box <- ggplot(df, aes(x=A_MEDIAN)) + geom_boxplot() + ggtitle("Annual Median Salary: all occupations") + xlab("Annual Median Salary ($)")
 a_median_box
 
+# Comparing to other occupations/industries isn't
+data_salaries <- df %>% filter(str_detect(OCC_TITLE, "Data"))
+data_salaries
 
-
+# Making a box plot of 
+# Since these salary distributions aren't symmetric, we'll use median as our measure of center
+ggplot(data_salaries, aes(x = OCC_TITLE, y = A_MEDIAN)) + geom_boxplot()
 
 
 
