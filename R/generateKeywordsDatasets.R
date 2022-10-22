@@ -5,37 +5,6 @@ library(dplyr)
 library(seqinr)
 library(reshape2)
 
-##### Parameters #####
-
-job = jsonlite::read_json("data/job_description_data.json")
-jobIdVector = sapply(job, function(x) { x$link }) %>%
-  magrittr::set_names(paste0("linkedin_", 1:length(.)), .)
-
-data.frame(job_id = jobIdVector, job_url = names(jobIdVector)) %>%
-  write.csv(., "data/keyword-posting-crosswalk.csv", row.names = FALSE)
-
-writeFiles = rep("data/keywords_linkedin/", length(jobIdVector))
-
-
-##### Function usage #####
-
-captureGroups = c("n.", "a.", "v.")
-dictionary = "data/dictionary.json" %>%
-  readLines(.) %>%
-    jsonlite::fromJSON(.)
-
-
-##### Sample runner #####
-
-values = GenerateKeywords(job, jobIdVector, writeFiles, dictionary, captureGroups, GrabLinkedin)
-aggregates = SumFreq(values)
-finalReport = aggregates %>% .[.$numWords == 1, ]
-
-write.csv(aggregates, "data/outputs/aggregateLinkedinPhrases.csv", row.names = FALSE)
-write.csv(finalReport, "data/outputs/aggregateLinkedinKeywords.csv", row.names = FALSE)
-
-
-##### Functions #####
 
 #' Defines how to look the Linkedin json data and convert to a vector of all capital letters
 #' @param x Filepath
@@ -46,8 +15,11 @@ GrabLinkedin <- function(x) {
   sapply(x$job_bullets, strsplit, "\\s") %>%
     c(., sapply(x$job_paragraphs, strsplit, "\\s")) %>%
       unlist(.) %>%
-        gsub("\\W", "", .) %>%
-          toupper(.)
+        # Fake regex for \\W and \\$
+        gsub("\\$", "zawarudo", .) %>%
+          gsub("\\W", "", .) %>%
+            gsub("zawarudo", "$", .) %>%
+              toupper(.)
 }
 
 #' Defines how to look the Linkedin json data and convert to a vector of all capital letters

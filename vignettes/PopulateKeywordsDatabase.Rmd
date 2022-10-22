@@ -1,0 +1,68 @@
+---
+title: "Populate Keywords Database"
+author: "Anthony Arroyo, Josh Forster"
+date: "10/22/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+library(magrittr)
+library(jsonlite)
+library(here)
+source(here::here("R/generateKeywordsDatasets.R"))
+```
+
+# Datasets
+
+We pulled a variety of job descriptions regarding data science jobs.
+Shown below are some the tweakable parameters to create the database.
+
+```{r parameters}
+job = jsonlite::read_json(here::here("data/job_description_data.json"))
+jobIdVector = sapply(job, function(x) { x$link }) %>%
+  magrittr::set_names(paste0("linkedin_", 1:length(.)), .)
+
+data.frame(job_id = jobIdVector, job_url = names(jobIdVector)) %>%
+  write.csv(., here::here("data/keyword-posting-crosswalk.csv"), row.names = FALSE)
+
+writeFiles = rep(here::here("data/keywords_linkedin/"), length(jobIdVector))
+
+dontWrite = TRUE
+if (dontWrite) {
+  writeFiles = NA
+}
+
+head(jobIdVector, 2)
+```
+
+# Captures from the English Dictionary
+
+To determine our stop words, we used Webster's dictionary to select nouns, verbs, and adjectives.
+
+```{r defaults}
+captureGroups = c("n.", "a.", "v.")
+dictionary = here::here("data/dictionary.json") %>%
+  readLines(.) %>%
+    jsonlite::fromJSON(.)
+
+head(dictionary[-1:-705, -3])
+```
+
+# Finished Aggregates
+
+The data created shows the keyphrase, number of occurences across all inputs, and number of words.
+We can use this to determine the most common keyphrases in Data Science job descriptions.
+
+```{r runner}
+values = GenerateKeywords(job, jobIdVector, writeFiles, dictionary, captureGroups, GrabLinkedin)
+aggregates = SumFreq(values)
+singularAggregates = aggregates %>% .[.$numWords == 1, ]
+writeReports = FALSE
+
+if (writeReports) {
+  write.csv(aggregates, here::here("data/outputs/aggregateLinkedinPhrases.csv"), row.names = F)
+  write.csv(singularAggregates, here::here("data/outputs/aggregateLinkedinKeywords.csv"), row.names = F)
+}
+
+head(aggregates[-1:-10, ], 20)
+```
