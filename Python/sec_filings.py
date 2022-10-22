@@ -39,7 +39,10 @@ def get_compensation(cik):
 if __name__ == "__main__":
     company_ciks = {
                     "Apple Inc": 320193,
-    
+                    "Amazon": 1018724,
+                    "Meta": 1326801,
+                    "Alphabet": 1652044,
+                    "Netflix": 1065280
                    }
     for company, cik  in company_ciks.items():
 
@@ -47,6 +50,12 @@ if __name__ == "__main__":
         comp_json = comp.json()
 
         df = pd.json_normalize(comp_json)
-        print(pd.json_normalize(comp_json))
+        print(df)
+        print(df['position'])
 
+        # Writing dfs to csv files in our data folder
+        company_name = company.replace(" ", "_").lower()
+        filename = f"{company_name}.csv"
+        data_path = os.path.join("..", "data", "compensation", filename)
+        df.to_csv(data_path, index=False)
         print("-------------------")
