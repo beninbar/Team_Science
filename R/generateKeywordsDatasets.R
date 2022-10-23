@@ -117,7 +117,10 @@ GenerateKeywords <- function(jobs, jobIds, writeCsv = NA, webster = dictionary,
                 dplyr::arrange(desc(frequency))
     
     if (! is.na(write)) {
-      filename = paste0(write, y, ".csv")
+      filename = paste0(here::here(write), "/", y, ".csv")
+      if (! dir.exists(here::here(write))) {
+        dir.create(here::here(write))
+      }
       
       if (! file.exists(filename)) {
         write.csv(result, filename, row.names = FALSE, quote = TRUE)
