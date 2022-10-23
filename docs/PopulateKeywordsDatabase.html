@@ -179,18 +179,24 @@ pre code {
 <div id="datasets" class="section level1">
 <h1>Datasets</h1>
 <p>We pulled a variety of job descriptions regarding data science jobs. Shown below are some the tweakable parameters to create the database.</p>
-<pre class="r"><code>job = jsonlite::read_json(here::here(&quot;data/job_description_data.json&quot;))
+<pre class="r"><code>postingsJson = &quot;data/job_description_data.json&quot;
+dontWrite = TRUE
+
+job = jsonlite::read_json(here::here(postingsJson))
 jobIdVector = sapply(job, function(x) { x$link }) %&gt;%
   magrittr::set_names(paste0(&quot;linkedin_&quot;, 1:length(.)), .)
+writeFiles = rep(&quot;data/keywords_linkedin/&quot;, length(jobIdVector))
 
-data.frame(job_id = jobIdVector, job_url = names(jobIdVector)) %&gt;%
-  write.csv(., here::here(&quot;data/keyword-posting-crosswalk.csv&quot;), row.names = FALSE)
+read.csv(here::here(&quot;data/keyword_posting_crosswalk.csv&quot;)) %&gt;% 
+  rbind(., data.frame(job_id = jobIdVector, file_store = writeFiles, job_store = postingsJson, job_url = names(jobIdVector))) %&gt;%
+    .[! duplicated(.), ] %&gt;%
+      write.csv(., here::here(&quot;data/keyword_posting_crosswalk.csv&quot;), row.names = FALSE)
 
-writeFiles = rep(here::here(&quot;data/keywords_linkedin/&quot;), length(jobIdVector))
 
-dontWrite = TRUE
 if (dontWrite) {
   writeFiles = NA
+} else {
+  writeFiles = here::here(writeFiles)
 }
 
 head(jobIdVector, 2)</code></pre>
@@ -251,6 +257,49 @@ head(aggregates[-1:-10, ], 20)</code></pre>
 ## 28           OF THE      26        2
 ## 29      STATISTICAL      26        1
 ## 30       ABILITY TO      25        2</code></pre>
+</div>
+<div id="combining-all-data-points" class="section level1">
+<h1>Combining all data points</h1>
+<p>If we prefer to look at the data in summary as opposed to by source, that is available too. By providing each data folder, we are loading our database and can select all available sets. Furthermore, the available sets are made known by reading the crosswalk table containing the primary keys for the interop.</p>
+<pre class="r"><code>allValues = here::here(&quot;data/keyword_posting_crosswalk.csv&quot;) %&gt;%
+  read.csv(.) %&gt;% 
+    .$file_store %&gt;%
+      unique(.) %&gt;%
+        here::here(.) %&gt;%
+          lapply(., LoadKeywordDatabase) %&gt;%
+            do.call(c, .)
+
+allAggregates = SumFreq(allValues)
+allSingularAggregates = allAggregates %&gt;% .[.$numWords == 1, ]
+writeFinalReports = FALSE
+
+if (writeFinalReports) {
+  write.csv(allAggregates, here::here(&quot;data/outputs/aggregateAllPhrases.csv&quot;), row.names = F)
+  write.csv(allSingularAggregates, here::here(&quot;data/outputs/aggregateAllKeywords.csv&quot;), row.names = F)
+}
+
+if (tools::md5sum(here::here(&quot;data/outputs/aggregateAllPhrases.csv&quot;)) == &quot;224a1868ac42be8e8390d273f142b66a&quot;) {
+  allAggregates[c(16, 18, 21, 27, 31, 34, 42, 46, 50, 53, 54, 67, 115, 140, 178, 179), ]
+} else {
+  head(allAggregates[-1:-15, ], 20)
+}</code></pre>
+<pre><code>##                  keyword sumFreq numWords
+## 16              ANALYSIS      86        1
+## 18             ANALYTICS      76        1
+## 21      MACHINE LEARNING      71        2
+## 27                MODELS      60        1
+## 31           STATISTICAL      56        1
+## 34                PYTHON      53        1
+## 42              RESEARCH      47        1
+## 46            STATISTICS      43        1
+## 50                   SQL      40        1
+## 53            TECHNIQUES      39        1
+## 54            ANALYTICAL      38        1
+## 67         COMMUNICATION      35        1
+## 115     COMPUTER SCIENCE      24        2
+## 140        DATA ANALYSIS      21        2
+## 178 COMMUNICATION SKILLS      18        2
+## 179       DATA ANALYTICS      18        2</code></pre>
 </div>
 
 
