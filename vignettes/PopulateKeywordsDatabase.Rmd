@@ -18,18 +18,24 @@ We pulled a variety of job descriptions regarding data science jobs.
 Shown below are some the tweakable parameters to create the database.
 
 ```{r parameters}
-job = jsonlite::read_json(here::here("data/job_description_data.json"))
+postingsJson = "data/job_description_data.json"
+dontWrite = TRUE
+
+job = jsonlite::read_json(here::here(postingsJson))
 jobIdVector = sapply(job, function(x) { x$link }) %>%
   magrittr::set_names(paste0("linkedin_", 1:length(.)), .)
+writeFiles = rep("data/keywords_linkedin/", length(jobIdVector))
 
-data.frame(job_id = jobIdVector, job_url = names(jobIdVector)) %>%
-  write.csv(., here::here("data/keyword-posting-crosswalk.csv"), row.names = FALSE)
+read.csv(here::here("data/keyword_posting_crosswalk.csv")) %>% 
+  rbind(., data.frame(job_id = jobIdVector, file_store = writeFiles, job_store = postingsJson, job_url = names(jobIdVector))) %>%
+    .[! duplicated(.), ] %>%
+      write.csv(., here::here("data/keyword_posting_crosswalk.csv"), row.names = FALSE)
 
-writeFiles = rep(here::here("data/keywords_linkedin/"), length(jobIdVector))
 
-dontWrite = TRUE
 if (dontWrite) {
   writeFiles = NA
+} else {
+  writeFiles = here::here(writeFiles)
 }
 
 head(jobIdVector, 2)
@@ -66,3 +72,36 @@ if (writeReports) {
 
 head(aggregates[-1:-10, ], 20)
 ```
+
+# Combining all data points
+
+If we prefer to look at the data in summary as opposed to by source, that is available too.
+By providing each data folder, we are loading our database and can select all available sets.
+Furthermore, the available sets are made known by reading the crosswalk table containing the primary keys for the interop.
+
+```{r amalgamate}
+allValues = here::here("data/keyword_posting_crosswalk.csv") %>%
+  read.csv(.) %>% 
+    .$file_store %>%
+      unique(.) %>%
+        here::here(.) %>%
+          lapply(., LoadKeywordDatabase) %>%
+            do.call(c, .)
+
+allAggregates = SumFreq(valuesAll)
+allSingularAggregates = allAggregates %>% .[.$numWords == 1, ]
+writeFinalReports = FALSE
+
+if (writeFinalReports) {
+  write.csv(allAggregates, here::here("data/outputs/aggregateAllPhrases.csv"), row.names = F)
+  write.csv(allSingularAggregates, here::here("data/outputs/aggregateAllKeywords.csv"), row.names = F)
+}
+
+if (tools::md5sum(here::here("data/outputs/aggregateAllPhrases.csv")) == "224a1868ac42be8e8390d273f142b66a") {
+  allAggregates[c(16, 18, 21, 27, 31, 34, 42, 46, 50, 53, 54, 67, 115, 140, 178, 179), ]
+} else {
+  head(allAggregates[-1:-15, ], 20)
+}
+```
+
+
