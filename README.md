@@ -3,6 +3,11 @@
 Our team collaborated to investigate the most desirable soft skills for data scientists to get hired.
 In our effort to determine this, we scraped Linkedin and Indeed for their job postings and then parsed the keyphrases with the highest occurrence.
 
+For notebooks on how to use this project, see the vignettes/ folder.
+For source code, see R/ and Python/ to find the files that suits your needs.
+Additional documentation for modifying the source code can be found in the man/ folder.
+Finally, you can find the whitepapers in html and pdf formats in the docs/ folder.
+
 Our data pipeline started with using Selenium and data cleaning methods to generate a json data file.
 This json data was then parsed for keywords based on its linguistic meaning.
 Finally, the keyphrases were aggregated and summed for every job posting by source.
