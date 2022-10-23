@@ -1,3 +1,5 @@
+<h1> Team Science </h1>
+
 Our team collaborated to investigate the most desirable soft skills for data scientists to get hired.
 In our effort to determine this, we scraped Linkedin and Indeed for their job postings and then parsed the keyphrases with the highest occurrence.
 
@@ -24,9 +26,11 @@ We concluded from the complete aggregated data that the most valuable data scien
   - Computer Science knowledge
 
 
-Authors
+<h1> Authors </h1>
 
 Anthony Arroyo (Anthogonyst)
+
 Josh Forster (jforster19)
+
 Andrew Bowen (andrewbowen19)
 
