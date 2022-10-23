@@ -88,7 +88,7 @@ allValues = here::here("data/keyword_posting_crosswalk.csv") %>%
           lapply(., LoadKeywordDatabase) %>%
             do.call(c, .)
 
-allAggregates = SumFreq(valuesAll)
+allAggregates = SumFreq(allValues)
 allSingularAggregates = allAggregates %>% .[.$numWords == 1, ]
 writeFinalReports = FALSE
 
