@@ -1,0 +1,71 @@
+---
+title: "LinkedIn Salary Data Extraction"
+author: "Andrew Bowen, Anthony Arroyo, Josh Forster, Ben Inbar"
+date: "2022-10-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(rjson)
+library(jsonlite)
+library(stringr)
+```
+
+Reading in our [scraped indeed job posting data](https://github.com/Anthogonyst/Team_Science/blob/master/data/indeed_job_description_data.json). Will need to extract the salary information contained within the `job_paragraphs` and `job_bullets` character fields.
+```{r}
+data_url <- "https://raw.githubusercontent.com/Anthogonyst/Team_Science/master/data/indeed_job_description_data.json"
+
+df = jsonlite::fromJSON(data_url, simplifyDataFrame = TRUE, flatten=TRUE)
+
+head(df)
+```
+Converting hourly wage to annual salary
+```{r}
+df[10, "salary"] = 42 * 40 * 52
+```
+
+
+```{r}
+df %>% mutate(foo = str_extract(salary, "^\\$(\\d{3},\\d{3})"))
+
+df$foo
+```
+
+Extracting salary listings from the job postings that include them. These are typically formatted as a range.
+```{r}
+df <- df %>%
+        mutate(ending_salary = str_extract(salary, "- \\$(...,...) a year")) %>%
+        mutate(ending_salary = str_replace(ending_salary, "- \\$", "")) %>%
+        mutate(ending_salary = str_replace(ending_salary, ",", "")) %>%
+        mutate(ending_salary = str_replace(ending_salary, " a year", ""))
+
+df$ending_salary <- as.numeric(df$ending_salary)
+
+df$ending_salary
+```
+
+These aren't perfect values, but they give us a good starting point to visualize some of our data.
+
+### Visualizing our Indeed Salaries
+
+```{r}
+ggplot(df, aes(x=ending_salary)) + geom_histogram(bins=10)
+```
+
+
+From our `bls.R` script, we see the annual mean salary of data scientists $108,660 a year. 
+
+```{r}
+bls_mean_ds_salary <- 108660  # from BLS 2021 data
+
+ggplot(df, aes(x=ending_salary)) + 
+      geom_histogram(bins=10) +
+      geom_vline(xintercept=bls_mean_ds_salary)
+```
+
+These salaries listed on Indeed are higher than the average listed salary for Data Scientist from the Bureau of Labor Statistics. This makes sense as the BLS data is from 2021 and several factors (inflation, higher demand for Data Scientists, etc.) could impact a change in data science salaries from then to now.
+
+
+
