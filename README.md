@@ -38,5 +38,3 @@ Anthony Arroyo (Anthogonyst)
 Josh Forster (jforster19)
 
 Andrew Bowen (andrewbowen19)
-
-Ben Inbar (beninbar)
